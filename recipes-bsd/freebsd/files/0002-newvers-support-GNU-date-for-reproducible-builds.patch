@@ -1,0 +1,35 @@
+From: Alejandro Hernandez <alejandro@enedino.org>
+Subject: [PATCH] newvers: support GNU date for SOURCE_DATE_EPOCH
+
+The supported Linux cross-build runs with GNU date. Its -r option reads
+a reference file instead of converting an epoch timestamp, so a valid
+SOURCE_DATE_EPOCH supplied by OE fails kernel and loader version generation.
+Try GNU date's equivalent after the native BSD invocation, preserving UTC,
+and retain the error for values that neither implementation accepts.
+
+Upstream-Status: Pending
+
+--- a/stand/common/newvers.sh
++++ b/stand/common/newvers.sh
+@@ -45,7 +45,8 @@
+ LC_ALL=C; export LC_ALL
+ u=${USER-root} h=${HOSTNAME-`hostname`}
+ if [ -n "$SOURCE_DATE_EPOCH" ]; then
+-	if ! t=$(date -ur $SOURCE_DATE_EPOCH 2>/dev/null); then
++	if ! t=$(date -ur "$SOURCE_DATE_EPOCH" 2>/dev/null) &&
++	    ! t=$(date -u -d "@$SOURCE_DATE_EPOCH" 2>/dev/null); then
+ 		echo "Invalid SOURCE_DATE_EPOCH" >&2
+ 		exit 1
+ 	fi
+--- a/sys/conf/newvers.sh
++++ b/sys/conf/newvers.sh
+@@ -196,7 +196,8 @@
+ d=$builddir
+ h=${HOSTNAME:-$(hostname)}
+ if [ -n "$SOURCE_DATE_EPOCH" ]; then
+-	if ! t=$(date -ur $SOURCE_DATE_EPOCH 2>/dev/null); then
++	if ! t=$(date -ur "$SOURCE_DATE_EPOCH" 2>/dev/null) &&
++	    ! t=$(date -u -d "@$SOURCE_DATE_EPOCH" 2>/dev/null); then
+ 		echo "Invalid SOURCE_DATE_EPOCH" >&2
+ 		exit 1
+ 	fi

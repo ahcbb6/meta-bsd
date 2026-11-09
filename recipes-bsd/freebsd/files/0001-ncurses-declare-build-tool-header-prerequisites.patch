@@ -1,0 +1,26 @@
+From: Alejandro Hernandez <alejandro@enedino.org>
+Subject: [PATCH] ncurses: declare source header prerequisites for build tools
+
+make_keys and make_hash include ncurses_dll.h through build.priv.h.
+On a clean Linux cross build this generated header does not exist yet:
+building just the build-tools target does not build every entry in SRCS.
+Include SRCHDRS in both tools' prerequisites rather than relying on an
+installed host ncurses header or a previous target-library build.
+
+Upstream-Status: Pending
+
+--- a/lib/ncurses/tinfo/Makefile
++++ b/lib/ncurses/tinfo/Makefile
+@@ -290,10 +290,10 @@
+ DEPENDOBJS+= make_hash make_keys
+ build-tools: make_hash make_keys
+ 
+-make_keys: make_keys.c names.c ncurses_def.h ${HEADERS} ${BUILD_TOOLS_META}
++make_keys: make_keys.c names.c ncurses_def.h ${HEADERS} ${SRCHDRS} ${BUILD_TOOLS_META}
+ 	${CC:N${CCACHE_BIN}} -o $@ ${CFLAGS} ${NCURSES_DIR}/ncurses/tinfo/make_keys.c
+ 
+-make_hash: make_hash.c hashsize.h ncurses_def.h ${HEADERS} ${BUILD_TOOLS_META}
++make_hash: make_hash.c hashsize.h ncurses_def.h ${HEADERS} ${SRCHDRS} ${BUILD_TOOLS_META}
+ 	${CC:N${CCACHE_BIN}} -o $@ ${CFLAGS} -DMAIN_PROGRAM \
+ 		${NCURSES_DIR}/ncurses/tinfo/make_hash.c
+ .endif

@@ -1,0 +1,4 @@
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+PS1='freebsd# '
+export PATH PS1
+umask 022

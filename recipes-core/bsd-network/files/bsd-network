@@ -1,0 +1,38 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+set -eu
+trap 'echo "BSD network configuration failed" >&2' 0
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export PATH
+
+ifconfig lo0 inet 127.0.0.1 up
+for interface in $(ifconfig -l); do
+    case "$interface" in
+        vtnet*) ;;
+        *) continue ;;
+    esac
+    details=$(ifconfig "$interface")
+    mac=$(printf '%s\n' "$details" | while read -r key value rest; do
+        case "$key" in
+            ether) printf '%s\n' "$value"; break ;;
+        esac
+    done)
+    case "$mac" in
+        52:54:00:12:34:[0-9a-f][0-9a-f])
+            # runqemu TAP has no DHCP server. Its MAC carries the client octet.
+            client=$((0x${mac##*:}))
+            if [ "$client" -lt 2 ] || [ "$client" -gt 254 ] || [ $((client % 2)) -ne 0 ]; then
+                echo "Invalid runqemu TAP address: $mac" >&2
+                exit 1
+            fi
+            gateway="192.168.7.$((client - 1))"
+            ifconfig "$interface" inet "192.168.7.$client" netmask 255.255.255.0 up
+            route add default "$gateway"
+            printf 'nameserver %s\n' '@TAP_NAMESERVER@' > /etc/resolv.conf
+            ;;
+        *)
+            dhclient "$interface"
+            ;;
+    esac
+done
+trap - 0

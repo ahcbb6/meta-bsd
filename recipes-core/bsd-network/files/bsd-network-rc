@@ -1,0 +1,15 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+# PROVIDE: bsd_network
+# REQUIRE: netif routing
+# BEFORE: NETWORKING
+# KEYWORD: nojail
+
+. /etc/rc.subr
+name="bsd_network"
+rcvar="bsd_network_enable"
+start_cmd="/usr/sbin/bsd-network"
+stop_cmd=":"
+load_rc_config "$name"
+: ${bsd_network_enable:=YES}
+run_rc_command "$1"

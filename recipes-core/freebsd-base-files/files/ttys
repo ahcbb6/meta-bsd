@@ -1,0 +1,2 @@
+console none unknown off secure
+ttyu0 "/usr/libexec/getty std.115200" vt100 on secure

@@ -1,0 +1,2 @@
+# OE creates debug-source files after importing FreeBSD's install metadata.
+/usr/src/debug 0755 root root true 0644 root root
