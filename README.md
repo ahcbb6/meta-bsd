@@ -7,7 +7,8 @@ kernel and userspace are built using the Clang/LLVM toolchain provided by
 BitBake.
 
 Currently supported BSPs:
-- QEMU x86-64 (OE-Core's `qemux86-64` machine)
+- qemux86-64
+- qemuarm64
 
 ## Dependencies
 
@@ -56,6 +57,8 @@ DISTRO = "freebsd"
 MACHINE = "qemux86-64"
 ```
 
+For ARM64, use `MACHINE = "qemuarm64"` instead.
+
 ## Build and run FreeBSD
 
 4. Build the image:
@@ -66,12 +69,16 @@ bitbake freebsd-image
 
 The image includes the FreeBSD base system, kernel, bootloader and network
 configuration. Bootable Wic disk images and root filesystem archives are
-generated under `tmp/deploy/images/qemux86-64/`.
+generated under `tmp/deploy/images/<machine>/`.
+
+The ARM64 image boots through UEFI using FreeBSD's `loader.efi`. The build
+deploys QEMU's packaged `edk2-aarch64-code.fd` firmware alongside the image for
+`runqemu`.
 
 5. Boot the image in QEMU with a serial console and user-mode networking:
 
 ```bash
-runqemu qemux86-64 freebsd-image nographic slirp
+runqemu nographic slirp
 ```
 
 Log in as `root` without a password. Networking is configured automatically.

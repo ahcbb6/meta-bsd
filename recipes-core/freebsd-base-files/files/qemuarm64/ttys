@@ -1,0 +1,3 @@
+console none unknown off secure
+# The QEMU PL011 console has no modem carrier signal.
+ttyu0 "/usr/libexec/getty 3wire.115200" vt100 on secure

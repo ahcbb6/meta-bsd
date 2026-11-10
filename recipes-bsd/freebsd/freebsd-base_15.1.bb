@@ -6,7 +6,7 @@ require conf/distro/include/freebsd-${PV}.inc
 require freebsd-src.inc
 inherit freebsd-make deploy
 
-COMPATIBLE_HOST = "x86_64-.*-freebsd.*"
+COMPATIBLE_HOST = "(x86_64|aarch64)-.*-freebsd.*"
 INHIBIT_DEFAULT_DEPS = "1"
 DEPENDS += "virtual/cross-cc virtual/cross-binutils"
 PROVIDES = "virtual/libc virtual/libiconv virtual/kernel virtual/compilerlibs compiler-rt libcxx \
@@ -18,6 +18,7 @@ SRC_URI += "file://src.conf file://apply-metadata.py \
 
 do_configure[noexec] = "1"
 FREEBSD_BOOT_FILES = "pmbr gptboot"
+FREEBSD_BOOT_FILES:aarch64 = "loader.efi"
 do_compile() {
     install -d ${B}/obj
     freebsd_make buildworld

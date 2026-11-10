@@ -25,4 +25,4 @@ python bsd_disk_mbr() {
         stream.seek(0)
         stream.write(boot[:440])
 }
-do_image_wic[postfuncs] += "bsd_disk_mbr"
+do_image_wic[postfuncs] += "${@'bsd_disk_mbr' if d.getVar('TARGET_ARCH') == 'x86_64' else ''}"
