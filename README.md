@@ -1,5 +1,5 @@
 # meta-bsd
-BSD distribution layer compatible with OpenEmbedded.
+BSD distribution layer compatible with the Yocto Project/OpenEmbedded.
 
 The initial supported distribution is FreeBSD, with its native kernel, userspace
 and rc init system. Following upstream FreeBSD's use of Clang/LLVM, the FreeBSD
@@ -19,9 +19,6 @@ This layer depends on:
 
      URI: https://git.openembedded.org/openembedded-core
      branch: master
-
-The layer declares compatibility with the `blacksail` OpenEmbedded release
-series.
 
 ## License
 
@@ -85,3 +82,4 @@ Log in as `root` without a password. Networking is configured automatically.
 
 This is a development image with passwordless root access, not a hardened
 production image.
+
