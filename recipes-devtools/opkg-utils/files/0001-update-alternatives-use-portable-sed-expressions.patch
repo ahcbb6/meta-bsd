@@ -1,0 +1,38 @@
+From: Alejandro Hernandez <alejandro@enedino.org>
+Subject: [PATCH] update-alternatives: use portable sed expressions
+
+BusyBox sed uses the target libc's regex implementation. FreeBSD rejects
+the GNU \s escape, breaking alternative removal. Use a POSIX character
+class and avoid the GNU \+ repetition operator when normalizing paths.
+
+Upstream-Status: Pending
+
+--- a/update-alternatives
++++ b/update-alternatives
+@@ -84,7 +84,7 @@ remove_alt() {
+ 	[ ! -f $ad/$name ] && return 0
+ 
+ 	path=`echo $path | protect_slashes | protect_special_character`
+-	sed -ne "/^$path\s.*/!p" $ad/$name > $ad/$name.new
++	sed -ne "/^$path[[:space:]].*/!p" $ad/$name > $ad/$name.new
+ 	mv $ad/$name.new $ad/$name
+ }
+ 
+@@ -143,7 +143,7 @@ do_install() {
+ 	local path="$3"
+ 	local priority="$4"
+ 
+-	path=`echo $path | sed 's|/\+|/|g'`
++	path=`echo $path | sed 's|//*|/|g'`
+ 
+ 	# This is a bad hack, but I haven't thought of a cleaner solution yet...
+ 	[ -n "$OPKG_OFFLINE_ROOT" ] && path=`echo $path | sed "s|^$OPKG_OFFLINE_ROOT/*|/|"`
+@@ -160,7 +160,7 @@ do_remove() {
+ 	local name="$1"
+ 	local path="$2"
+ 
+-	path=`echo $path | sed 's|/\+|/|g'`
++	path=`echo $path | sed 's|//*|/|g'`
+ 
+ 	# This is a bad hack, but I haven't thought of a cleaner solution yet...
+ 	[ -n "$OPKG_OFFLINE_ROOT" ] && path=`echo $path | sed "s|^$OPKG_OFFLINE_ROOT/*|/|"`

@@ -83,3 +83,18 @@ Log in as `root` without a password. Networking is configured automatically.
 This is a development image with passwordless root access, not a hardened
 production image.
 
+## Optional command-line tools
+
+You ma want to install packages built from other OpenEmbedded layers, some have
+been tested to work such as BusyBox, Bash, Vim, curl, Python3, these can easily
+be installed on the image just like its done for custom Linux builds:
+
+```bitbake
+IMAGE_INSTALL:append = " vim busybox git curl less bash python3 perl grep"
+```
+
+FreeBSD's native `/bin/sh` remains the system shell, even when Bash or BusyBox
+are installed. Bash is available as `bash`, and BusyBox provides `ash` and a
+portable subset of its utilities (default OE config is overriden to avoid
+Linux specific tools). Some FreeBSD native tools are kept to allow startup
+compatibility even after installing an alternative.

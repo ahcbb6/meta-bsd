@@ -1,0 +1,22 @@
+From: Alejandro Hernandez <alejandro@enedino.org>
+Subject: [PATCH] build-details: record the target extension suffix
+
+The generator runs with the build interpreter when cross compiling. Its
+first extension suffix names the host ABI, not the target ABI. Use the
+target sysconfig value as is already done for abi.extension_suffix.
+
+Upstream-Status: Pending
+
+--- a/Tools/build/generate-build-details.py
++++ b/Tools/build/generate-build-details.py
+@@ -69,7 +69,9 @@ def generate_data(schema_version: str) -> collections.defaultdict[str, Any]:
+     data['suffixes']['bytecode'] = importlib.machinery.BYTECODE_SUFFIXES
+     #data['suffixes']['optimized_bytecode'] = importlib.machinery.OPTIMIZED_BYTECODE_SUFFIXES
+     #data['suffixes']['debug_bytecode'] = importlib.machinery.DEBUG_BYTECODE_SUFFIXES
+-    data['suffixes']['extensions'] = importlib.machinery.EXTENSION_SUFFIXES
++    data['suffixes']['extensions'] = importlib.machinery.EXTENSION_SUFFIXES.copy()
++    if os.environ.get('_PYTHON_HOST_PLATFORM'):
++        data['suffixes']['extensions'][0] = sysconfig.get_config_var('EXT_SUFFIX')
+ 
+     LIBDIR = sysconfig.get_config_var('LIBDIR')
+     LIBPL = sysconfig.get_config_var('LIBPL')
