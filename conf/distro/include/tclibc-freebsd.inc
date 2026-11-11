@@ -9,6 +9,7 @@ BASE_LIB:tune-cortexa57 = "lib"
 PREFERRED_PROVIDER_virtual/libc = "freebsd-base"
 PREFERRED_PROVIDER_virtual/libiconv = "freebsd-base"
 PREFERRED_PROVIDER_virtual/crypt = "freebsd-base"
+PREFERRED_PROVIDER_virtual/libintl = "gettext"
 # FreeBSD world supplies compiler-rt, libc++ and its libgcc compatibility ABI.
 PREFERRED_PROVIDER_virtual/${MLPREFIX}compilerlibs:libc-freebsd = "freebsd-base"
 PREFERRED_PROVIDER_compiler-rt = "freebsd-base"

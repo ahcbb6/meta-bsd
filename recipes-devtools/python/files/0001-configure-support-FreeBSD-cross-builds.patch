@@ -1,0 +1,40 @@
+From: Alejandro Hernandez <alejandro@enedino.org>
+Subject: [PATCH] configure: support FreeBSD cross builds
+
+Select the FreeBSD platform from the target tuple rather than the build host.
+The existing native FreeBSD compiler and library probes can then be reused.
+
+Upstream-Status: Pending
+
+--- a/configure.ac
++++ b/configure.ac
+@@ -323,7 +323,12 @@ then
+        # ac_sys_system and ac_sys_release are used for setting
+        # a lot of different things including 'define_xopen_source'
+        # in the case statement below.
++       ac_sys_release=
+ 	case "$host" in
++	*-*-freebsd*)
++		ac_sys_system=FreeBSD
++		ac_sys_release=${host_os#freebsd}
++		;;
+ 	*-*-linux-android*)
+ 		ac_sys_system=Linux-android
+ 		;;
+@@ -353,7 +358,6 @@ then
+ 		MACHDEP="unknown"
+ 		AC_MSG_ERROR([cross build not supported for $host])
+ 	esac
+-	ac_sys_release=
+     else
+ 	ac_sys_system=`uname -s`
+ 	if test "$ac_sys_system" = "AIX" \
+@@ -810,5 +814,8 @@ if test "$cross_compiling" = yes; then
+ 		esac
+ 		;;
++	*-*-freebsd*)
++		_host_ident=$host_cpu
++		;;
+ 	*-*-vxworks*)
+ 		_host_ident=$host_cpu
+ 		;;

@@ -4,11 +4,15 @@ LIC_FILES_CHKSUM = "file://COPYRIGHT;md5=05a8a3274bdffd66f88f061859a648c1"
 
 require conf/distro/include/freebsd-${PV}.inc
 require freebsd-src.inc
-inherit freebsd-make deploy
+require freebsd-alternatives.inc
+inherit freebsd-make deploy update-alternatives
 
 COMPATIBLE_HOST = "(x86_64|aarch64)-.*-freebsd.*"
 INHIBIT_DEFAULT_DEPS = "1"
 DEPENDS += "virtual/cross-cc virtual/cross-binutils"
+# Build the alternatives provider after staging libc, not before compiling it.
+DEPENDS:remove = "virtual/${MLPREFIX}update-alternatives"
+do_package_qa[depends] += "virtual/${MLPREFIX}update-alternatives:do_packagedata"
 PROVIDES = "virtual/libc virtual/libiconv virtual/kernel virtual/compilerlibs compiler-rt libcxx \
             openssl zlib ncurses bzip2 xz virtual/crypt"
 PSEUDO_PASSWD = "${WORKDIR}/pseudo-passwd:${STAGING_DIR_TARGET}:${PSEUDO_SYSROOT}"
@@ -59,6 +63,19 @@ FILES:${PN}-bootblocks = "${libdir}/freebsd-boot"
 FILES:${PN} = "/"
 RDEPENDS:${PN} += "freebsd-rtld ${PN}-modules"
 RPROVIDES:${PN} += "openssl openssl-bin bzip2 xz"
+ALTERNATIVE_PRIORITY = "10"
+
+python __anonymous() {
+    names = []
+    for path in d.getVar("FREEBSD_ALTERNATIVE_PATHS").split():
+        name = os.path.basename(path)
+        if name == "[":
+            name = "lbracket"
+        names.append(name)
+        d.setVarFlag("ALTERNATIVE_LINK_NAME", name, path)
+    d.setVar("ALTERNATIVE:" + d.getVar("PN"), " ".join(names))
+}
+
 # These are runtime module entry points, not development linker symlinks.
 INSANE_SKIP:${PN}-modules = "dev-so"
 # The native kernel relocation model and ELF interpreter path are ABI choices.
