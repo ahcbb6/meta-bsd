@@ -8,6 +8,12 @@ on:
   schedule:
     - cron: "0 12 * * *"
   workflow_dispatch:
+    inputs:
+      extra_packages:
+        description: "Extra image packages, space-separated (e.g. vim git bash python3)"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -78,6 +84,8 @@ jobs:
           } | tee "$CI_ARTIFACTS/revisions.txt"
 
       - name: Configure BitBake
+        env:
+          EXTRA_PACKAGES: ${{ inputs.extra_packages || '' }}
         run: |
           mkdir -p "$CI_BUILD_DIR"
           source openembedded-core/oe-init-build-env "$CI_BUILD_DIR"
@@ -91,6 +99,19 @@ jobs:
           INHERIT += "rm_work"
           BB_DISKMON_DIRS = "STOPTASKS,\${TMPDIR},5G,100K HALT,\${TMPDIR},1G,1K"
           EOF
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import re
+
+          packages = os.environ["EXTRA_PACKAGES"].split()
+          if any(not re.fullmatch(r"[a-z0-9][a-z0-9+.-]*", package) for package in packages):
+              raise SystemExit("Extra packages must be package names containing lowercase letters, digits, '+', '.' or '-'.")
+          if packages:
+              with Path("conf/local.conf").open("a") as config:
+                  config.write('IMAGE_INSTALL:append = " ' + " ".join(packages) + '"\n')
+              print("Extra image packages: " + " ".join(packages))
+          PY
           bitbake-layers show-layers
 
       - name: Build freebsd-image
