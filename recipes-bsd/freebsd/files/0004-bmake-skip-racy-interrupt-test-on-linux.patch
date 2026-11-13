@@ -1,0 +1,30 @@
+From: Alejandro Hernandez <alejandro@enedino.org>
+Subject: [PATCH] bmake: skip racy cmd-interrupt test on Linux
+
+The cmd-interrupt test's compat case sends SIGINT to make and then sleeps
+before creating its target. It expects make to leave that target behind,
+recording a known failure as "expected-fail". The result depends on signal
+delivery and process scheduling; Linux CI can instead report
+"unexpected-ok" and abort the bootstrap of an otherwise usable bmake.
+
+Use the existing BROKEN_TESTS mechanism to exclude this test on Linux,
+as is already done for other hosts. Keep all other bootstrap tests and
+their failure handling enabled. This affects the host-side bootstrap,
+regardless of the FreeBSD target architecture.
+
+Upstream-Status: Inappropriate [Linux bootstrap test workaround]
+
+--- a/contrib/bmake/unit-tests/Makefile
++++ b/contrib/bmake/unit-tests/Makefile
+@@ -509,6 +509,11 @@
+ BROKEN_TESTS+= shell-ksh
+ .endif
+ 
++.if ${.MAKE.OS} == "Linux"
++# The compat interrupt case races signal handling against target creation.
++BROKEN_TESTS+= cmd-interrupt
++.endif
++
+ .if ${.MAKE.OS:NIRIX*} == ""
+ BROKEN_TESTS+= \
+ 	cmd-interrupt \
