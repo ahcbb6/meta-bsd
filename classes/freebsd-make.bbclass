@@ -7,6 +7,8 @@ FREEBSD_MACHINE_ARCH:aarch64 = "aarch64"
 FREEBSD_OBJTOP = "${B}/obj${S}/${FREEBSD_MACHINE}.${FREEBSD_MACHINE_ARCH}"
 FREEBSD_BOOTSTRAP_TOOLS = "${FREEBSD_OBJTOP}/tmp/legacy"
 DEBUG_PREFIX_MAP:append = " -ffile-prefix-map=${FREEBSD_OBJTOP}=${TARGET_DBGSRC_DIR} "
+# Native recipes inherit GCC flags, but XCC/XCXX/XCPP below always use Clang.
+DEBUG_PREFIX_MAP:remove = "-fcanon-prefix-map"
 DEPENDS += "clang-native lld-native llvm-native bison-native flex-native bc-native \
             coreutils-native time-native xz-native libarchive-native"
 do_compile[cleandirs] = "${B}"

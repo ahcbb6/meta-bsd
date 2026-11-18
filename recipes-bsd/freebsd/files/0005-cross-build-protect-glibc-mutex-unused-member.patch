@@ -1,0 +1,25 @@
+From: Alejandro Hernandez <alejandro@enedino.org>
+Subject: [PATCH] cross-build: protect glibc mutex __unused member
+
+glibc 2.43 uses a member named __unused in struct __pthread_mutex_s.
+FreeBSD's compatibility headers define __unused as an attribute, which
+removes the member name and breaks C++ compilation of bootstrap dtc,
+including the pthread mutex initializers in libstdc++.
+
+Wrap bits/struct_mutex.h with the existing Linux __unused workaround.
+Protecting the defining header covers inclusion through both sys/types.h
+and pthread.h without changing the host mutex layout or disabling the
+FreeBSD attribute for bootstrap sources.
+
+Upstream-Status: Pending
+
+--- /dev/null
++++ b/tools/build/cross-build/include/linux/bits/struct_mutex.h
+@@ -0,0 +1,7 @@
++/* SPDX-License-Identifier: BSD-2-Clause */
++#pragma once
++
++/* glibc 2.43 names a mutex member __unused. */
++#include "../__unused_workaround_start.h"
++#include_next <bits/struct_mutex.h>
++#include "../__unused_workaround_end.h"
